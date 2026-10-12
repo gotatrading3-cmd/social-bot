@@ -166,6 +166,7 @@ STATS = [_pct_recovery, _streak, _rr, _compound, _risk_unit]
 TAGS_FB = "#trading #forex #bourse #tradingtips #discipline"
 TAGS_IG = ("#trading #forex #trader #tradingfrancais #bourse #motivation #investissement #bitcoin #crypto "
            "#tradingforex #gestiondurisque #mindsettrader #apprendreletrading #tradingdebutant")
+TAGS_CRYPTO = " #crypto #bitcoin #cryptomonnaie #blockchain"
 TAGS_TT = "#trading #forex #trader #tradingtips #motivation #bourse #fyp"
 
 KINDS = ["motivation", "conseil", "stat", "regle", "mythe", "question"]
@@ -206,11 +207,11 @@ TG_HANDLE = os.environ.get("SOCIAL_CTA_HANDLE", "@Gotatrade")
 ACCOUNT_LINK = os.environ.get("SOCIAL_ACCOUNT_LINK", "https://affs.click/6wm7g")
 
 # Rythme d'appels a l'action : sur 6 videos -> 2 Telegram, 2 ouverture de compte, 2 sans rien (le contenu respire)
-CTA_SEQ = ["tg", "none", "account", "tg", "account", "none"]
+CTA_SEQ = ["tg"]  # demande du proprietaire (2026-10-12) : chaque publication invite vers la communaute Telegram
 
 # texte de la barre dans la video : (ligne 1, ligne 2)
 CTA_BAR = {
-    "tg": ("Apprends plus gratuitement sur Telegram", TG_HANDLE + "  ·  lien dans la bio"),
+    "tg": ("Rejoins notre communauté sur Telegram", "Lien dans la bio  ·  " + TG_HANDLE),
     "account": ("Prêt à pratiquer ? Ouvre ton compte", "Lien partenaire dans la bio"),
 }
 
@@ -218,8 +219,8 @@ CTA_BAR = {
 def cta(platform, kind):
     if kind == "tg":
         if platform == "fb":
-            return "📲 Pour apprendre plus de compétences en trading, rejoins-nous gratuitement sur Telegram : " + TG_LINK
-        return "📲 Pour apprendre plus en trading, rejoins-nous gratuitement sur Telegram : lien dans la bio (%s)" % TG_HANDLE
+            return "📲 Rejoins notre communauté Telegram : on y échange en temps réel pour avancer vers la liberté financière. " + TG_LINK
+        return "📲 Rejoins notre communauté Telegram (lien dans la bio, %s) : on y échange en temps réel pour avancer vers la liberté financière." % TG_HANDLE
     if kind == "account":
         base = "🚀 Envie de passer à la pratique ? Ouvre ton compte de trading chez notre partenaire"
         tail = " (lien partenaire) : " + ACCOUNT_LINK if platform == "fb" else " : lien partenaire dans la bio"
@@ -235,5 +236,7 @@ def caption(c, platform):  # c["cta"] in tg | account | none
         core = c["title"] + "\n\n" + c["body"]
     if platform == "tt":
         core = c["title"] + " — " + c["body"] if c["kind"] != "regle" else core
+    if c.get("topic") == "crypto":
+        tags += TAGS_CRYPTO
     extra = cta(platform, c.get("cta", "none"))
     return core.strip() + "\n\n" + (extra + "\n\n" if extra else "") + tags

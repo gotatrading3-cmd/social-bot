@@ -26,7 +26,7 @@ jobs:
   post:
     if: ${{ vars.SOCIAL_STOP != 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     env:
       PYTHONIOENCODING: utf-8
       SOCIAL_STATE_DIR: ${{ github.workspace }}/state
@@ -61,6 +61,17 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r requirements.txt
+      - name: Voix francaise (CC BY 4.0, gardee en cache)
+        uses: actions/cache@v4
+        with:
+          path: voix
+          key: voix-siwis-medium-v1
+      - name: Telecharger la voix si besoin
+        run: |
+          mkdir -p voix
+          B=https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium
+          [ -s voix/fr_FR-siwis-medium.onnx.json ] || curl -sfL --retry 5 -o voix/fr_FR-siwis-medium.onnx.json $B/fr_FR-siwis-medium.onnx.json
+          [ "$(stat -c %s voix/fr_FR-siwis-medium.onnx 2>/dev/null || echo 0)" = "63201294" ] || curl -sfL --retry 5 -o voix/fr_FR-siwis-medium.onnx $B/fr_FR-siwis-medium.onnx
       - name: Un cycle
         run: python social_runner.py --once ${{ github.event.inputs.force == 'true' && '--force' || '' }}
       - name: Sauver l'etat

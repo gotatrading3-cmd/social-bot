@@ -4,3 +4,7 @@ __pycache__/
 social_state.json
 *.tmp
 lot_videos/
+voix/
+lot_explicatifs/
+lot.log
+lot_expl.log

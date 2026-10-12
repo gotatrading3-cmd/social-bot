@@ -2,3 +2,4 @@ pillow>=10
 requests>=2.31
 cryptography>=42
 numpy>=1.26
+piper-tts

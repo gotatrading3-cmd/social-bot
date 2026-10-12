@@ -4,3 +4,5 @@ Rien n'est publié tant que la variable GitHub SOCIAL_LIVE n'est pas "true". Arr
 Réglages (variables du dépôt) : SOCIAL_MAX_PER_DAY, SOCIAL_GAP_MIN, SOCIAL_HOURS, SOCIAL_VIDEO_EVERY, SOCIAL_CTA_LINK, SOCIAL_ACCOUNT_LINK.
 Aperçu local sans rien publier : python social_runner.py --preview 6
 Connexion Meta (Facebook + Instagram) : python configurer_reseaux.py gotatrading3-cmd/social-bot
+Vidéos explicatives : social_scripts.py (14 sujets trading + crypto), voix de synthèse Piper « siwis » (CC BY 4.0, Université d'Édimbourg) -> à créditer dans la bio : « Voix : SIWIS, Univ. d'Édimbourg, CC BY 4.0 ».
+Lot à programmer à la main : python social_runner.py --batch 14 (dossier lot_explicatifs/).

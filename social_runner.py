@@ -76,6 +76,20 @@ def pick(st, rnd=None):
     return c
 
 
+def pick_video(st):
+    """Video explicative suivante (une par passage, dans l'ordre ; on recommence a la fin de la liste)."""
+    import social_scripts
+    scripts = social_scripts.SCRIPTS
+    script = scripts[st.get("exp_i", 0) % len(scripts)]
+    c = dict(kind="explicatif", title=script["title"], body=script["summary"], topic=script["topic"], label="EXPLICATIF", cta="tg")
+    return c, script
+
+
+def render_video_post(st, path, c, script):
+    import social_explainer
+    social_explainer.render_explainer(script, path)
+
+
 def want_video(st):
     every = int(env("SOCIAL_VIDEO_EVERY", "2"))
     return every > 0 and st["n"] % every == every - 1
@@ -119,7 +133,7 @@ def due(st, force):
     if force:
         return True
     gap = int(env("SOCIAL_GAP_MIN", "170")) * 60
-    if now - max(st.get("last", 0), st.get("last_try", 0) - gap + 600) < gap:
+    if now - st.get("last", 0) < gap or now - st.get("last_try", 0) < 600:
         return False
     h = dt.datetime.utcnow().hour
     a, b = [int(x) for x in env("SOCIAL_HOURS", "6-22").split("-")]
@@ -140,12 +154,19 @@ def run_once(force=False):
         return 0
     os.makedirs(OUT, exist_ok=True)
     video = want_video(st)
-    c = pick(st)
+    script = None
+    if video:
+        c, script = pick_video(st)
+    else:
+        c = pick(st)
     seed = random.randrange(10 ** 6)
     stamp = dt.datetime.utcnow().strftime("%Y%m%d_%H%M")
     path = os.path.join(OUT, "post_%s.%s" % (stamp, "mp4" if video else "png"))
     try:
-        (sr.render_video if video else sr.render_image)(c, path, seed=seed)
+        if video:
+            render_video_post(st, path, c, script)
+        else:
+            sr.render_image(c, path, seed=seed)
     except Exception as e:
         log("ERREUR fabrication :", e)
         st["last_try"] = time.time()
@@ -153,7 +174,6 @@ def run_once(force=False):
         return 1
     log("fabrique : %s '%s' (%s)" % (c["kind"], c["title"], "video" if video else "image"))
 
-    ff = None
     # TikTok : le jeton de renouvellement peut avoir tourne -> copie chiffree dans l'etat
     tt_refresh = None
     f = _fernet()
@@ -197,6 +217,8 @@ def run_once(force=False):
         st["posts_today"] = {day: st["posts_today"].get(day, 0) + 1}
         st["last"] = now
         st["n"] += 1
+        if video:
+            st["exp_i"] = st.get("exp_i", 0) + 1
         st["history"].append({"t": int(now), "kind": c["kind"], "title": c["title"], "video": video, "res": results})
     else:
         st["last_try"] = now  # echec partout : on reessaie dans ~10 min, pas en boucle
@@ -222,23 +244,24 @@ def preview(n):
 
 
 def batch(n):
-    """Lot de videos pretes a programmer a la main (Meta Business Suite / TikTok Studio) : lot_videos/NN_*.mp4 + NN_*.txt"""
-    d = os.path.join(HERE, "lot_videos")
+    """Lot de videos explicatives a programmer a la main (Meta Business Suite / TikTok Studio) : lot_explicatifs/NN_cle.mp4 + .txt"""
+    import social_scripts
+    d = os.path.join(HERE, "lot_explicatifs")
     os.makedirs(d, exist_ok=True)
-    st = {"n": 0, "recent": []}
     nl = chr(10)
     sep = nl + "=" * 40 + nl
     for i in range(n):
-        st["n"] = i
-        c = pick(st)
-        base = os.path.join(d, "%02d_%s" % (i + 1, c["kind"]))
-        sr.render_video(c, base + ".mp4", seed=random.randrange(10 ** 6))
+        script = social_scripts.SCRIPTS[i % len(social_scripts.SCRIPTS)]
+        c = dict(kind="explicatif", title=script["title"], body=script["summary"], topic=script["topic"], cta="tg")
+        base = os.path.join(d, "%02d_%s" % (i + 1, script["key"]))
+        if os.path.exists(base + ".mp4"):
+            continue
+        render_video_post({}, base + ".mp4", c, script)
         with open(base + ".txt", "w", encoding="utf-8") as f:
             f.write("FACEBOOK" + sep + sc.caption(c, "fb") + nl + nl)
             f.write("INSTAGRAM" + sep + sc.caption(c, "ig") + nl + nl)
             f.write("TIKTOK" + sep + sc.caption(c, "tt") + nl)
         log("pret :", base + ".mp4")
-
 
 
 if __name__ == "__main__":
