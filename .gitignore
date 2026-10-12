@@ -1,0 +1,5 @@
+apercu/
+__pycache__/
+*.pyc
+social_state.json
+*.tmp
