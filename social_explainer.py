@@ -20,9 +20,9 @@ _voice = None
 import re
 # Prononciation : la voix lit "trader" comme "trade-é" ; on ecrit les mots comme ils se disent (les sous-titres gardent l'orthographe)
 PRON = [
-    (r"\btraders?\b", "trédeur"), (r"\btrades?\b", "tréd"), (r"\btrading\b", "trédingue"), (r"\bspreads?\b", "sprède"),
-    (r"\bpips\b", "pipsse"), (r"\bstop-loss\b", "stop loss"), (r"\bTelegram\b", "Télégrame"), (r"\bforex\b", "forexe"),
-    (r"Bitcoin", "Bitcoïne"), (r"blockchain", "blocchaine"), (r"1 000", "mille"), (r"1:2", "un pour deux"), (r"%", " pour cent"), (r"€", " euros"), (r"÷", "divisé par"),
+    (r"\btraders?\b", "trédeur"), (r"\btrades?\b", "tréd"), (r"\btrading\b", "trédine"), (r"\bspreads?\b", "sprède"),
+    (r"\bpips\b", "pipsse"), (r"\bstop-loss\b", "stop loss"), (r"\bTelegram\b", "Télégrame"), (r"\bforex\b", "forèx"),
+    (r"Bitcoin", "Bitcoïne"), (r"blockchain", "bloc chaîne"), (r"1 000", "mille"), (r"1:2", "un pour deux"), (r"%", " pour cent"), (r"€", " euros"), (r"÷", "divisé par"),
 ]
 
 

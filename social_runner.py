@@ -254,7 +254,7 @@ def batch(n):
         script = social_scripts.SCRIPTS[i % len(social_scripts.SCRIPTS)]
         c = dict(kind="explicatif", title=script["title"], body=script["summary"], topic=script["topic"], cta="tg")
         base = os.path.join(d, "%02d_%s" % (i + 1, script["key"]))
-        if os.path.exists(base + ".mp4"):
+        if os.path.exists(base + ".mp4") and not env("SOCIAL_REFAIRE", ""):
             continue
         render_video_post({}, base + ".mp4", c, script)
         with open(base + ".txt", "w", encoding="utf-8") as f:
