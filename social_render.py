@@ -1,11 +1,11 @@
 """Rendu des visuels (image 4:5 pour Facebook/Instagram, video 9:16 pour Reels/TikTok). Pillow + ffmpeg, 100 % gratuit."""
 import os, random, shutil, subprocess, tempfile
+from social_content import CTA_BAR
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(HERE, "assets")
 BRAND = "GOTA TRADING"
-CTA_HANDLE = os.environ.get("SOCIAL_CTA_HANDLE", "@Gotatrade")
 
 THEMES = [  # fond haut, fond bas, accent, texte
     ((8, 12, 24), (14, 30, 52), (240, 185, 11), (245, 247, 250)),
@@ -141,12 +141,17 @@ def _text_layer(c, w, h, theme, p=1.0):
 
     # pied
     a, _ = slide(0.8, 1.0)
+    bar = CTA_BAR.get(c.get("cta"))
     bar_y = int(h * (0.77 if h / w > 1.6 else 0.905))  # video : au-dessus de la zone cachee par l'interface
-    d.rounded_rectangle([mx, bar_y, w - mx, bar_y + int(w * 0.11)], radius=int(w * 0.03), fill=acc + (int(255 * a),))
-    d.text((w // 2, bar_y + int(w * 0.0275)), "Apprends plus gratuitement sur Telegram", font=_font(True, int(w * 0.031)),
-           fill=(10, 12, 20, int(255 * a)), anchor="mm")
-    d.text((w // 2, bar_y + int(w * 0.078)), CTA_HANDLE + "  ·  lien dans la bio", font=_font(False, int(w * 0.032)),
-           fill=(10, 12, 20, int(255 * a)), anchor="mm")
+    if bar:
+        d.rounded_rectangle([mx, bar_y, w - mx, bar_y + int(w * 0.11)], radius=int(w * 0.03), fill=acc + (int(255 * a),))
+        d.text((w // 2, bar_y + int(w * 0.0275)), bar[0], font=_font(True, int(w * 0.031)),
+               fill=(10, 12, 20, int(255 * a)), anchor="mm")
+        d.text((w // 2, bar_y + int(w * 0.078)), bar[1], font=_font(False, int(w * 0.032)),
+               fill=(10, 12, 20, int(255 * a)), anchor="mm")
+    else:
+        d.text((mx, bar_y + int(w * 0.07)), "Un conseil de trading chaque jour", font=_font(False, int(w * 0.03)),
+               fill=fg + (int(170 * a),), anchor="ls")
     return lay
 
 

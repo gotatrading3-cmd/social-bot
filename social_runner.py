@@ -62,14 +62,18 @@ def _fernet():
 def pick(st, rnd=None):
     rnd = rnd or random.Random()
     kind = SEQ[st["n"] % len(SEQ)]
+    cta = sc.CTA_SEQ[st["n"] % len(sc.CTA_SEQ)]
     for _ in range(40):
         c = sc.make(kind, rnd)
+        c["cta"] = cta
         key = hashlib.sha1((c["kind"] + c["title"] + c.get("body", "")).encode()).hexdigest()[:12]
         if key not in st["recent"]:
             st["recent"] = (st["recent"] + [key])[-150:]
             return c
     st["recent"] = st["recent"][-20:]  # bibliotheque epuisee : on repart, la mise en page change de toute facon
-    return sc.make(kind, rnd)
+    c = sc.make(kind, rnd)
+    c["cta"] = cta
+    return c
 
 
 def want_video(st):

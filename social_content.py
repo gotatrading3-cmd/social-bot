@@ -203,15 +203,31 @@ import os
 
 TG_LINK = os.environ.get("SOCIAL_CTA_LINK", "https://t.me/Gotatrade")
 TG_HANDLE = os.environ.get("SOCIAL_CTA_HANDLE", "@Gotatrade")
+ACCOUNT_LINK = os.environ.get("SOCIAL_ACCOUNT_LINK", "https://affs.click/6wm7g")
+
+# Rythme d'appels a l'action : sur 6 videos -> 2 Telegram, 2 ouverture de compte, 2 sans rien (le contenu respire)
+CTA_SEQ = ["tg", "none", "account", "tg", "account", "none"]
+
+# texte de la barre dans la video : (ligne 1, ligne 2)
+CTA_BAR = {
+    "tg": ("Apprends plus gratuitement sur Telegram", TG_HANDLE + "  ·  lien dans la bio"),
+    "account": ("Prêt à pratiquer ? Ouvre ton compte", "Lien partenaire dans la bio"),
+}
 
 
-def cta(platform):
-    if platform == "fb":
-        return "📲 Pour apprendre plus de compétences en trading, rejoins-nous gratuitement sur Telegram : " + TG_LINK
-    return "📲 Pour apprendre plus en trading, rejoins-nous gratuitement sur Telegram : lien dans la bio (%s)" % TG_HANDLE
+def cta(platform, kind):
+    if kind == "tg":
+        if platform == "fb":
+            return "📲 Pour apprendre plus de compétences en trading, rejoins-nous gratuitement sur Telegram : " + TG_LINK
+        return "📲 Pour apprendre plus en trading, rejoins-nous gratuitement sur Telegram : lien dans la bio (%s)" % TG_HANDLE
+    if kind == "account":
+        base = "🚀 Envie de passer à la pratique ? Ouvre ton compte de trading chez notre partenaire"
+        tail = " (lien partenaire) : " + ACCOUNT_LINK if platform == "fb" else " : lien partenaire dans la bio"
+        return base + tail + "\nLe trading comporte un risque de perte en capital."
+    return ""
 
 
-def caption(c, platform):
+def caption(c, platform):  # c["cta"] in tg | account | none
     tags = {"fb": TAGS_FB, "ig": TAGS_IG, "tt": TAGS_TT}[platform]
     if c["kind"] == "regle":
         core = c["title"] + " :\n" + "\n".join("✅ " + i for i in c["items"])
@@ -219,4 +235,5 @@ def caption(c, platform):
         core = c["title"] + "\n\n" + c["body"]
     if platform == "tt":
         core = c["title"] + " — " + c["body"] if c["kind"] != "regle" else core
-    return core.strip() + "\n\n" + tags
+    extra = cta(platform, c.get("cta", "none"))
+    return core.strip() + "\n\n" + (extra + "\n\n" if extra else "") + tags
