@@ -5,7 +5,7 @@
   python social_runner.py --once --force  -> publie tout de suite
 
 Securite : sans la variable SOCIAL_LIVE=true, --once ne publie RIEN (il fabrique le post dans apercu/ et l'indique).
-Variables : SOCIAL_GAP_MIN (170), SOCIAL_MAX_PER_DAY (6), SOCIAL_HOURS ("6-22", heures UTC), SOCIAL_VIDEO_EVERY (1 = que des videos),
+Variables : SOCIAL_GAP_MIN (170), SOCIAL_MAX_PER_DAY (6), SOCIAL_HOURS ("6-22", heures UTC), SOCIAL_VIDEO_EVERY (2 = une video sur deux, 1 = que des videos),
 SOCIAL_STATE_DIR (dossier de l'etat), SOCIAL_MEDIA_DIR + GITHUB_REPOSITORY (hebergement des fichiers pour Instagram).
 """
 import argparse, base64, hashlib, json, os, random, subprocess, sys, time, datetime as dt
@@ -77,7 +77,7 @@ def pick(st, rnd=None):
 
 
 def want_video(st):
-    every = int(env("SOCIAL_VIDEO_EVERY", "1"))
+    every = int(env("SOCIAL_VIDEO_EVERY", "2"))
     return every > 0 and st["n"] % every == every - 1
 
 
@@ -221,13 +221,36 @@ def preview(n):
         print("   Facebook :", sc.caption(c, "fb").replace("\n", " | ")[:160])
 
 
+def batch(n):
+    """Lot de videos pretes a programmer a la main (Meta Business Suite / TikTok Studio) : lot_videos/NN_*.mp4 + NN_*.txt"""
+    d = os.path.join(HERE, "lot_videos")
+    os.makedirs(d, exist_ok=True)
+    st = {"n": 0, "recent": []}
+    nl = chr(10)
+    sep = nl + "=" * 40 + nl
+    for i in range(n):
+        st["n"] = i
+        c = pick(st)
+        base = os.path.join(d, "%02d_%s" % (i + 1, c["kind"]))
+        sr.render_video(c, base + ".mp4", seed=random.randrange(10 ** 6))
+        with open(base + ".txt", "w", encoding="utf-8") as f:
+            f.write("FACEBOOK" + sep + sc.caption(c, "fb") + nl + nl)
+            f.write("INSTAGRAM" + sep + sc.caption(c, "ig") + nl + nl)
+            f.write("TIKTOK" + sep + sc.caption(c, "tt") + nl)
+        log("pret :", base + ".mp4")
+
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--preview", type=int, default=0)
+    ap.add_argument("--batch", type=int, default=0)
     a = ap.parse_args()
-    if a.preview:
+    if a.batch:
+        batch(a.batch)
+    elif a.preview:
         preview(a.preview)
     elif a.once:
         sys.exit(run_once(a.force))

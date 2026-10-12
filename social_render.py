@@ -1,5 +1,6 @@
 """Rendu des visuels (image 4:5 pour Facebook/Instagram, video 9:16 pour Reels/TikTok). Pillow + ffmpeg, 100 % gratuit."""
 import os, random, shutil, subprocess, tempfile
+import social_audio
 from social_content import CTA_BAR
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
@@ -186,8 +187,9 @@ def render_video(c, path, seed=None, seconds=8, fps=20, size=(1080, 1920)):
             fr = fr.crop(((w - cw) // 2, (h - ch) // 2, (w + cw) // 2, (h + ch) // 2)).resize((w, h))
             fr.alpha_composite(_text_layer(c, w, h, theme, p))
             fr.convert("RGB").save(os.path.join(tmp, "f%04d.jpg" % i), quality=90)
+        wav = social_audio.make_wav(os.path.join(tmp, "musique.wav"), seconds, seed % 4)
         cmd = [ff, "-y", "-loglevel", "error", "-framerate", str(fps), "-i", os.path.join(tmp, "f%04d.jpg"),
-               "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-shortest",
+               "-i", wav, "-shortest",
                "-c:v", "libx264", "-pix_fmt", "yuv420p", "-profile:v", "high", "-movflags", "+faststart",
                "-c:a", "aac", "-b:a", "96k", path]
         subprocess.run(cmd, check=True)

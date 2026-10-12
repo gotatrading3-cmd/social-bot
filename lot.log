@@ -1,0 +1,14 @@
+C:\Users\GOTA TRADING\.claude\social-bot\social_runner.py:29: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  print(dt.datetime.utcnow().strftime("%H:%M:%S"), *a, flush=True)
+17:39:21 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\01_motivation.mp4
+17:39:42 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\02_conseil.mp4
+17:40:06 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\03_stat.mp4
+17:40:28 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\04_regle.mp4
+17:40:52 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\05_mythe.mp4
+17:41:16 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\06_motivation.mp4
+17:41:40 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\07_conseil.mp4
+17:42:01 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\08_question.mp4
+17:42:23 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\09_stat.mp4
+17:42:44 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\10_regle.mp4
+17:43:06 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\11_mythe.mp4
+17:43:27 pret : C:\Users\GOTA TRADING\.claude\social-bot\lot_videos\12_conseil.mp4

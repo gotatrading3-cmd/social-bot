@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 social_state.json
 *.tmp
+lot_videos/
