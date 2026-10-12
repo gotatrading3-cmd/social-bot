@@ -12,6 +12,10 @@ on:
         description: "Publier tout de suite (true/false)"
         type: string
         default: "false"
+      essai:
+        description: "Essai de fabrication d'une video (rien n'est publie) : true/false"
+        type: string
+        default: "false"
   schedule:
     - cron: "*/15 * * * *"
 
@@ -72,7 +76,17 @@ jobs:
           B=https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium
           [ -s voix/fr_FR-siwis-medium.onnx.json ] || curl -sfL --retry 5 -o voix/fr_FR-siwis-medium.onnx.json $B/fr_FR-siwis-medium.onnx.json
           [ "$(stat -c %s voix/fr_FR-siwis-medium.onnx 2>/dev/null || echo 0)" = "63201294" ] || curl -sfL --retry 5 -o voix/fr_FR-siwis-medium.onnx $B/fr_FR-siwis-medium.onnx
+      - name: Essai de fabrication (sans publier)
+        if: ${{ github.event.inputs.essai == 'true' }}
+        run: python social_runner.py --batch 1
+      - name: Recuperer la video d'essai
+        if: ${{ github.event.inputs.essai == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-essai
+          path: lot_explicatifs/
       - name: Un cycle
+        if: ${{ github.event.inputs.essai != 'true' }}
         run: python social_runner.py --once ${{ github.event.inputs.force == 'true' && '--force' || '' }}
       - name: Sauver l'etat
         if: always()
