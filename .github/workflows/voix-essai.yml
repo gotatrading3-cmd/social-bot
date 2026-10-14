@@ -7,7 +7,7 @@ on:
       textes:
         description: "Phrases a faire dire, separees par ||"
         type: string
-        default: "Dix pertes de suite. Ça arrive à tous les traders. Alors, combien te reste-t-il ?||Avec 1 % de risque par trade, il te reste environ 90 % de ton capital. Avec 10 % de risque, il ne te reste que 35 %."
+        default: "Dix pertes de suite ! Ça arrive à tous les trédeurs. Alors, combien te reste-t-il ?||Avec 1 pour cent de risque, il te reste quatre-vingt-dix pour cent. Avec 10 pour cent, il ne te reste que 35. Même série de pertes, deux destins différents !"
       ref:
         description: "Extrait de reference (ref1, ref2 ou ref3)"
         type: string
@@ -46,7 +46,7 @@ jobs:
       - name: Cloner la voix
         run: |
           mkdir -p sortie
-          time python voix_clone.py sortie/essai.wav "${{ github.event.inputs.textes }}" "${{ github.event.inputs.ref }}"
+          time python voix_clone.py --variantes sortie "${{ github.event.inputs.textes }}" "${{ github.event.inputs.ref }}"
           for f in sortie/*.wav; do ffmpeg -loglevel error -y -i "$f" -b:a 128k "${f%.wav}.mp3"; done
           ls -la sortie
       - uses: actions/upload-artifact@v4

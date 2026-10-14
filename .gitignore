@@ -9,3 +9,12 @@ lot_explicatifs/
 lot.log
 lot_expl.log
 voix_perso/
+voix_clonee/
+voix_tmp/
+test_visuel/
+reference/
+*.log
+lot_explicatifs/
+voix_perso/
+voix/
+apercu/

@@ -37,7 +37,7 @@ RISQUE = dict(
                     dict(beat=8, title="Stop posé avant", icon="stop", col="r"),
                     dict(beat=9, title="Limite par jour", icon="lock", col="g")]),
         dict(type="big", at=10, until=11, y=330, lines=["SURVIVRE", "D'ABORD"], cols=["g", "w"], size=84, lh=110),
-        dict(type="cta", at=11, y=190),
+        dict(type="cta", at=11, y=190, delay=0.5),
     ])
 
 SEMAINE = dict(
@@ -73,7 +73,7 @@ SEMAINE = dict(
              items=[dict(beat=9, title="Note en multiple de R", icon="book", col="b"),
                     dict(beat=10, title="Gain ≥ 2 × le risque", icon="target", col="y"),
                     dict(beat=11, title="Juge sur 50 trades", icon="count", col="g")]),
-        dict(type="cta", at=12, y=190),
+        dict(type="cta", at=12, y=190, delay=0.5),
     ])
 
 MOTION = [RISQUE, SEMAINE]

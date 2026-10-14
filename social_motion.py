@@ -21,7 +21,7 @@ _fonts = {}
 def font(bold, size):
     k = (bold, size)
     if k not in _fonts:
-        _fonts[k] = ImageFont.truetype(os.path.join(ASSETS, "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"), int(size * S))
+        _fonts[k] = ImageFont.truetype(os.path.join(ASSETS, "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"), max(2, int(size * S)))
     return _fonts[k]
 
 
@@ -250,6 +250,28 @@ def icon(cv, kind, cx, cy, a, p):
         for r, al in ((26, 0.5), (17, 0.7), (8, 1)):
             cv.circ(cx, cy, r, outline=COL["y"], width=3, a=a * al)
         cv.line([(cx + 30 * (1 - p) + 2, cy - 30 * (1 - p) - 2), (cx, cy)], COL["w"], 3, a)
+    elif kind == "clock":
+        cv.circ(cx, cy, 24, outline=COL["y"], width=3, a=a)
+        ang = math.radians(-90 + 300 * p)
+        cv.line([(cx, cy), (cx + 16 * math.cos(ang), cy + 16 * math.sin(ang))], COL["y"], 3, a)
+        cv.line([(cx, cy), (cx, cy - 11)], COL["y"], 3, a)
+    elif kind == "coin":
+        cv.circ(cx, cy, 24, outline=COL["r"], width=3, a=a)
+        cv.text(cx, cy, "$", 24, COL["r"], a=a)
+    elif kind == "warn":
+        cv.line([(cx, cy - 24), (cx + 26, cy + 20), (cx - 26, cy + 20), (cx, cy - 24)], COL["r"], 3.5, a)
+        cv.text(cx, cy + 6, "!", 22, COL["r"], a=a)
+    elif kind == "chart":
+        pts = [(cx - 26, cy + 14), (cx - 10, cy), (cx + 2, cy + 8), (cx + 26, cy - 18)]
+        k = max(2, int(2 + 2 * p))
+        cv.line(pts[:k], COL["b"], 3.5, a)
+        cv.circ(pts[min(k, 4) - 1][0], pts[min(k, 4) - 1][1], 4, fill=COL["b"], a=a)
+    elif kind == "shield":
+        cv.line([(cx - 20, cy - 18), (cx + 20, cy - 18), (cx + 20, cy + 4), (cx, cy + 24), (cx - 20, cy + 4), (cx - 20, cy - 18)], COL["g"], 3.5, a)
+        cv.line([(cx - 9, cy), (cx - 2, cy + 8), (cx + 11, cy - 8)], COL["g"], 3.5, a * p)
+    elif kind == "check":
+        cv.circ(cx, cy, 24, outline=COL["g"], width=3, a=a)
+        cv.line([(cx - 11, cy), (cx - 3, cy + 9), (cx + 13, cy - 9)], COL["g"], 4, a * clamp(p * 1.5))
     elif kind == "count":
         cv.circ(cx, cy, 26, outline=COL["b"], width=3, a=a)
         cv.text(cx, cy, str(int(50 * p)), 20, COL["b"], a=a)
@@ -304,7 +326,69 @@ def draw_cta(cv, el, t, T):
     cv.text(W / 2, y + 328, "Lien dans la bio  ·  @Gotatrade", 20, (10, 12, 20), bold=False, a=a * q)
 
 
-DRAW = dict(candles=draw_candles, bars=draw_bars, week=draw_week, stat=draw_stat, chip=draw_chip, big=draw_big, cards=draw_cards, cta=draw_cta)
+def draw_side(cv, el, t, T):
+    a, loc = _alpha(el, t, T)
+    if a <= 0:
+        return
+    x, y, w, h = el["x"], el["y"], el["w"], el["h"]
+    col = COL[el["col"]]
+    p = eb(loc / 0.5)
+    dy = (1 - clamp(p)) * 30
+    cv.rr(x, y + dy, x + w, y + h + dy, 20, fill=(255, 255, 255), a=0.05 * a, outline=col, width=2.2)
+    cv.text(x + w / 2, y + 36 + dy, el["title"], 18, col, a=a)
+    for k, ln in enumerate(el["lines"]):
+        pr = eo((loc - 0.3 - k * 0.25) / 0.4)
+        cv.text(x + w / 2, y + 90 + k * 42 + dy, ln, 18, COL["w"], bold=False, a=a * pr)
+    if el.get("big"):
+        pb = eb((loc - 1.0) / 0.5)
+        cv.text(x + w / 2, y + h - 50 + dy, el["big"], max(1, int(34 * clamp(pb, 0.01, 1.1))), col, a=a)
+
+
+def draw_levels(cv, el, t, T):
+    a, loc = _alpha(el, t, T)
+    if a <= 0:
+        return
+    x0, x1, y0, y1 = 60, 660, el["y"], el["y"] + el.get("h", 340)
+    path = el["path"]
+    n = len(path)
+    lo, hi = el.get("range", (min(path), max(path)))
+    sx = lambda i: x0 + i * (x1 - x0) / (n - 1)
+    sy = lambda v: y1 - (v - lo) / (hi - lo) * (y1 - y0)
+    cv.rr(x0 - 16, y0 - 26, x1 + 16, y1 + 26, 22, fill=(255, 255, 255), a=0.04 * a)
+    m = eio(loc / el.get("dur", 2.6)) * (n - 1)
+    i0 = int(m)
+    pts = [(sx(i), sy(path[i])) for i in range(i0 + 1)]
+    if i0 < n - 1:
+        f = m - i0
+        pts.append((sx(i0) + (sx(i0 + 1) - sx(i0)) * f, sy(path[i0]) + (sy(path[i0 + 1]) - sy(path[i0])) * f))
+    if len(pts) > 1:
+        cv.line(pts, COL[el.get("col", "b")], 4, a)
+        cv.circ(pts[-1][0], pts[-1][1], 6, fill=COL[el.get("col", "b")], a=a)
+    for lv in el.get("hlines", []):
+        tl = t - T["start"][lv["beat"]] - lv.get("delay", 0.2)
+        if tl <= 0:
+            continue
+        pa = eo(tl / 0.45)
+        y = sy(lv["v"])
+        xe = x0 + (x1 - x0) * pa
+        xx = x0
+        while xx < xe:
+            cv.line([(xx, y), (min(xx + 14, xe), y)], COL[lv["col"]], 3, a)
+            xx += 24
+        cv.rr(x1 - cv.tw(lv["text"], 16) - 22, y - 36, x1, y - 8, 10, fill=COL[lv["col"]], a=0.22 * a * pa, outline=COL[lv["col"]], width=1.2)
+        cv.text(x1 - 11, y - 22, lv["text"], 16, COL[lv["col"]], anchor="rm", a=a * pa)
+    for mk in el.get("marks", []):
+        tl = t - T["start"][mk["beat"]] - mk.get("delay", 0.2)
+        if tl <= 0:
+            continue
+        pp = eb(tl / 0.5)
+        px_, py_ = sx(mk["i"]), sy(path[mk["i"]])
+        cv.circ(px_, py_, 13 * clamp(pp, 0, 1.2), outline=COL[mk["col"]], width=3, a=a)
+        dy = 34 if mk.get("below", True) else -34
+        cv.text(px_, py_ + dy, mk["text"], 16, COL[mk["col"]], a=a * clamp(pp))
+
+
+DRAW = dict(side=draw_side, levels=draw_levels, candles=draw_candles, bars=draw_bars, week=draw_week, stat=draw_stat, chip=draw_chip, big=draw_big, cards=draw_cards, cta=draw_cta)
 
 
 # ------------------------------------------------------------------ sous-titres
@@ -323,7 +407,8 @@ def parse(text):
     merged = []
     for w, c in out:  # la ponctuation reste collee au mot qui la precede
         if merged and all(ch in ".,;:?!" for ch in w):
-            merged[-1] = (merged[-1][0] + w, merged[-1][1])
+            sep = chr(160) if w in (":", "?", "!", ";") else ""   # typographie francaise : espace avant : ? ! ;
+            merged[-1] = (merged[-1][0] + sep + w, merged[-1][1])
         else:
             merged.append((w, c))
     return merged
@@ -444,7 +529,7 @@ def render_motion(scenario, path, workers=6):
         with ProcessPoolExecutor(max_workers=workers) as ex:
             list(ex.map(frame_job, [(scenario, T, c, tmp) for c in chunks]))
         cmd = [ff, "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", os.path.join(tmp, "f%05d.jpg"), "-i", vpath, "-i", music,
-               "-filter_complex", "[1:a]volume=1.6,aresample=44100[v];[2:a]volume=0.12,aresample=44100[m];[v][m]amix=inputs=2:duration=first:normalize=0[a]",
+               "-filter_complex", "[1:a]volume=0.9,aresample=44100[v];[2:a]volume=0.10,aresample=44100[m];[v][m]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=9[a]",
                "-map", "0:v", "-map", "[a]", "-t", "%.2f" % T["total"], "-c:v", "libx264", "-pix_fmt", "yuv420p", "-profile:v", "high",
                "-movflags", "+faststart", "-c:a", "aac", "-b:a", "128k", path]
         subprocess.run(cmd, check=True)
