@@ -22,7 +22,7 @@ import re
 PRON = [
     (r"\btraders?\b", "trédeur"), (r"\btrades?\b", "tréd"), (r"\btrading\b", "trédine"), (r"\bspreads?\b", "sprède"),
     (r"\bpips\b", "pipsse"), (r"\bstop-loss\b", "stop loss"), (r"\bTelegram\b", "Télégrame"), (r"\bforex\b", "forèx"),
-    (r"Bitcoin", "Bitcoïne"), (r"blockchain", "bloc chaîne"), (r"1 000", "mille"), (r"1:2", "un pour deux"), (r"%", " pour cent"), (r"€", " euros"), (r"÷", "divisé par"),
+    (r"Ethereum", "Éthéréomme"), (r"stablecoins?", "stable coïne"), (r"Bitcoin", "Bitcoïne"), (r"blockchain", "bloc chaîne"), (r"1 000", "mille"), (r"1:2", "un pour deux"), (r"%", " pour cent"), (r"€", " euros"), (r"÷", "divisé par"),
 ]
 
 
