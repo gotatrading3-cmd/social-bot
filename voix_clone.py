@@ -10,7 +10,28 @@ def charger_refs(enc_path, key):
         t.extractall(d)
     return d
 
+def batch(fichiers, outdir, ref="ref1"):
+    """fichiers : JSON [{"id": ..., "text": ...}] ; ecrit outdir/<id>.wav pour chaque phrase (le texte est deja ecrit comme il se prononce)."""
+    import json
+    refs = charger_refs(os.environ.get("VOICE_REF_ENC", "voice/voix_ref.enc"), os.environ["VOICE_KEY"])
+    import torch, torchaudio as ta
+    from chatterbox.mtl_tts import ChatterboxMultilingualTTS
+    model = ChatterboxMultilingualTTS.from_pretrained(device="cpu")
+    os.makedirs(outdir, exist_ok=True)
+    for fp in fichiers:
+        for it in json.load(open(fp, encoding="utf-8")):
+            dst = os.path.join(outdir, it["id"] + ".wav")
+            if os.path.exists(dst):
+                continue
+            wav = model.generate(it["text"], language_id="fr", audio_prompt_path=os.path.join(refs, ref + ".wav"),
+                                 exaggeration=0.45, cfg_weight=0.4)
+            ta.save(dst, wav, model.sr)
+            print("fait", it["id"], flush=True)
+
+
 def main():
+    if sys.argv[1] == "--json":
+        return batch(sys.argv[3:], sys.argv[2])
     out, textes = sys.argv[1], sys.argv[2]
     ref = sys.argv[3] if len(sys.argv) > 3 else "ref1"
     refs = charger_refs(os.environ.get("VOICE_REF_ENC", "voice/voix_ref.enc"), os.environ["VOICE_KEY"])

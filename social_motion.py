@@ -388,6 +388,21 @@ def frame_job(args):
     return len(frames)
 
 
+def load_voice(src, dst, thr=0.012):
+    """Lit un wav (n'importe quelle frequence), enleve les silences de debut et de fin, ecrit en 24000 Hz mono 16 bits."""
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", src, "-ac", "1", "-ar", "24000", "-sample_fmt", "s16", dst + ".tmp.wav"], check=True)
+    with wave.open(dst + ".tmp.wav", "rb") as r:
+        a = np.frombuffer(r.readframes(r.getnframes()), dtype="<i2")
+    os.remove(dst + ".tmp.wav")
+    env = np.abs(a.astype(float)) / 32768.0
+    idx = np.where(env > thr)[0]
+    if len(idx):
+        a = a[max(0, idx[0] - 1200): idx[-1] + 2400]
+    with wave.open(dst, "wb") as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(24000); w.writeframes(a.tobytes())
+    return len(a) / 24000, 24000
+
+
 def render_motion(scenario, path, workers=6):
     import social_explainer as E
     import social_audio
@@ -401,7 +416,11 @@ def render_motion(scenario, path, workers=6):
         for i, b in enumerate(beats):
             wp = os.path.join(tmp, "v%02d.wav" % i)
             spoken = b.get("say") or TAG.sub(lambda m: m.group(2), b["text"])
-            ad, sr_ = E.tts(spoken, wp)
+            ext = os.path.join(scenario["voice_dir"], "%s_%02d.wav" % (scenario["key"], i)) if scenario.get("voice_dir") else None
+            if ext and os.path.exists(ext):
+                ad, sr_ = load_voice(ext, wp)   # voix clonee (fabriquee chez GitHub)
+            else:
+                ad, sr_ = E.tts(spoken, wp)
             b["_audio"] = ad
             b["_layout"] = layout(parse(b["text"]))
             wavs.append(wp)

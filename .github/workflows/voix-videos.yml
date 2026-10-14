@@ -1,0 +1,56 @@
+name: Voix des videos
+
+# Fabrique, avec la voix clonee du proprietaire (avec son accord), l'audio de chaque phrase des videos listees.
+# Les textes (deja ecrits comme ils se prononcent) sont dans textes_voix/<cle>.json. Rien n'est publie.
+on:
+  workflow_dispatch:
+    inputs:
+      cles:
+        description: "Cles des videos, separees par des espaces (ex : risque-1-pourcent ratio-semaine)"
+        type: string
+        default: "risque-1-pourcent ratio-semaine"
+      ref:
+        description: "Extrait de reference (ref1, ref2 ou ref3)"
+        type: string
+        default: "ref1"
+
+permissions:
+  contents: read
+
+jobs:
+  voix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      VOICE_KEY: ${{ secrets.VOICE_KEY }}
+      VOICE_REF_ENC: ${{ github.workspace }}/voice/voix_ref.enc
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: voice
+          path: voice
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Modeles gardes en cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-chatterbox-multilingual-v1
+      - name: Installer
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg libsndfile1
+          pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install chatterbox-tts cryptography
+      - name: Cloner la voix, phrase par phrase
+        run: |
+          FILES=""
+          for k in ${{ github.event.inputs.cles }}; do FILES="$FILES textes_voix/$k.json"; done
+          time python -c "import sys; sys.argv=['voix_clone.py','--json','sortie']+'$FILES'.split(); import voix_clone; voix_clone.main()"
+          ls sortie | wc -l
+      - uses: actions/upload-artifact@v4
+        with:
+          name: voix-videos
+          path: sortie/*.wav
