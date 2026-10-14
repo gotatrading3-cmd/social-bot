@@ -475,7 +475,7 @@ def frame_job(args):
 
 def load_voice(src, dst, thr=0.012):
     """Lit un wav (n'importe quelle frequence), enleve les silences de debut et de fin, ecrit en 24000 Hz mono 16 bits."""
-    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", src, "-ac", "1", "-ar", "24000", "-sample_fmt", "s16", dst + ".tmp.wav"], check=True)
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", src, "-af", "atempo=1.12,acompressor=threshold=-20dB:ratio=3:attack=5:release=80,treble=g=2", "-ac", "1", "-ar", "24000", "-sample_fmt", "s16", dst + ".tmp.wav"], check=True)
     with wave.open(dst + ".tmp.wav", "rb") as r:
         a = np.frombuffer(r.readframes(r.getnframes()), dtype="<i2")
     os.remove(dst + ".tmp.wav")
@@ -509,7 +509,7 @@ def render_motion(scenario, path, workers=6):
             b["_audio"] = ad
             b["_layout"] = layout(parse(b["text"]))
             wavs.append(wp)
-            d = max(b.get("min", 2.4), ad + 0.4)
+            d = max(b.get("min", 2.2), ad + 0.3)
             T["start"].append(t)
             T["dur"].append(d)
             t += d

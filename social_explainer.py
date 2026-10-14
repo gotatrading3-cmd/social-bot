@@ -26,10 +26,27 @@ PRON = [
 ]
 
 
+def _nombre(m):
+    """Les voix lisent '90' chiffre par chiffre : on ecrit les nombres en toutes lettres (90 -> quatre-vingt-dix ; 34,9 -> trente-quatre virgule neuf)."""
+    from num2words import num2words
+    brut = m.group(0).replace(chr(160), "").replace(" ", "")
+    try:
+        if "," in brut:
+            ent, dec = brut.split(",")
+            return num2words(int(ent), lang="fr") + " virgule " + " ".join(num2words(int(c), lang="fr") for c in dec)
+        return num2words(int(brut), lang="fr")
+    except Exception:
+        return m.group(0)
+
+
 def say(text):
     for pat, rep in PRON:
         text = re.sub(pat, rep, text, flags=re.I)
-    return text
+    text = text.replace("$", " dollars")
+    text = re.sub(r"\+(?=\d)", "plus ", text)
+    text = re.sub(r"(?<![\w])[-−](?=\d)", "moins ", text)
+    text = re.sub(r"\d{1,3}(?:[ " + chr(160) + r"]\d{3})+(?:,\d+)?|\d+(?:,\d+)?", _nombre, text)   # nombres -> lettres
+    return re.sub(r"  +", " ", text).strip()
 
 
 def tts(text, path):

@@ -18,3 +18,7 @@ lot_explicatifs/
 voix_perso/
 voix/
 apercu/
+voix_clonee_ancienne/
+*.wav
+*.mp3
+*.mp4

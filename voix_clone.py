@@ -24,7 +24,7 @@ def batch(fichiers, outdir, ref="ref1"):
             if os.path.exists(dst):
                 continue
             wav = model.generate(it["text"], language_id="fr", audio_prompt_path=os.path.join(refs, ref + ".wav"),
-                                 exaggeration=0.45, cfg_weight=0.4)
+                                 exaggeration=float(os.environ.get("EXAG", "0.85")), cfg_weight=float(os.environ.get("CFG", "0.20")))
             ta.save(dst, wav, model.sr)
             print("fait", it["id"], flush=True)
 

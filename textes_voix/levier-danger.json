@@ -9,15 +9,15 @@
  },
  {
   "id": "levier-danger_02",
-  "text": "Exemple : un levier de 100, et 100 dollars de marge."
+  "text": "Exemple : un levier de cent, et cent dollars de marge."
  },
  {
   "id": "levier-danger_03",
-  "text": "Tu contrôles une position de 10 000 dollars."
+  "text": "Tu contrôles une position de dix mille dollars."
  },
  {
   "id": "levier-danger_04",
-  "text": "Le prix baisse de 1  pour cent. Ça fait 100 dollars de perte."
+  "text": "Le prix baisse d'un pour cent. Ça fait cent dollars de perte."
  },
  {
   "id": "levier-danger_05",
@@ -37,7 +37,7 @@
  },
  {
   "id": "levier-danger_09",
-  "text": "Trois : risque 1  pour cent de ton capital, pas plus."
+  "text": "Trois : risque un pour cent de ton capital, pas plus."
  },
  {
   "id": "levier-danger_10",

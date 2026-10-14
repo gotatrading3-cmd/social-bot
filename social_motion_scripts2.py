@@ -44,7 +44,7 @@ LEVIER = dict(
         dict(text="Il {y|amplifie} tout : les gains, mais aussi les pertes."),
         dict(text="Exemple : un levier de {y|100}, et {b|100 dollars} de marge.", min=3.4),
         dict(text="Tu contrôles une position de {b|10 000 dollars}.", min=3.0),
-        dict(text="Le prix baisse de {r|1 %}. Ça fait {r|100 dollars} de perte.", min=3.6),
+        dict(text="Le prix baisse d'{r|1 %}. Ça fait {r|100 dollars} de perte.", min=3.6),
         dict(text="Toute ta marge a disparu. En {r|une seule} bougie.", min=3.2),
         dict(text="Pour l'utiliser sans te brûler, trois règles."),
         dict(text="Un : un levier {g|faible} au départ."),
